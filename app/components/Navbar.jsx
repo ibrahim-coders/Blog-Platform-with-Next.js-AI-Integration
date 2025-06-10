@@ -6,6 +6,16 @@ import { useUser } from '../context/useProvider';
 export default function Navbar() {
   const { user } = useUser();
   console.log(user);
+
+  const fasword = name => {
+    if (!name) return '';
+    const words = name.trim().split(' ');
+    let initials = '';
+    for (let i = 0; i < Math.min(words.length, 2); i++) {
+      initials += words[i][0];
+    }
+    return initials.toUpperCase();
+  };
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-20 w-full  border-slate-200 bg-white/90 shadow">
@@ -21,18 +31,26 @@ export default function Navbar() {
             </Link>
 
             <div className="flex items-center px-6 ml-auto gap-2 lg:ml-0 lg:p-0">
-              <Link
-                href="/login"
-                className="inline-flex items-center py-2 px-5  text-slate-700  text-sm font-medium tracking-widehover:bg-slate-300 hover:text-slate-950 transition-colors duration-300 rounded"
-              >
-                <span>Login</span>
-              </Link>
-              <Link
-                href="/signup"
-                className="inline-flex items-center justify-center h-10 gap-2 px-5 text-sm font-medium tracking-wide text-white transition duration-300 rounded shadow-md whitespace-nowrap bg-emerald-500 shadow-emerald-200 hover:bg-emerald-600 hover:shadow-sm hover:shadow-emerald-200 focus:bg-emerald-700 focus:shadow-sm focus:shadow-emerald-200 focus-visible:outline-none disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:shadow-none"
-              >
-                <span>Sign up</span>
-              </Link>
+              {user?.email ? (
+                <h3 className="p-2 bg-emerald-100 text-emerald-600 rounded-full text-2xl font-bold">
+                  {fasword(user?.name)}
+                </h3>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="inline-flex items-center py-2 px-5  text-slate-700  text-sm font-medium tracking-widehover:bg-slate-300 hover:text-slate-950 transition-colors duration-300 rounded"
+                  >
+                    <span>Login</span>
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="inline-flex items-center justify-center h-10 gap-2 px-5 text-sm font-medium tracking-wide text-white transition duration-300 rounded shadow-md whitespace-nowrap bg-emerald-500 shadow-emerald-200 hover:bg-emerald-600 hover:shadow-sm hover:shadow-emerald-200 focus:bg-emerald-700 focus:shadow-sm focus:shadow-emerald-200 focus-visible:outline-none disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:shadow-none"
+                  >
+                    <span>Sign up</span>
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

@@ -59,6 +59,7 @@ export const POST = async req => {
       {
         success: true,
         message: 'Login successful',
+        user: { email: user.email, name: user.name },
       },
       { status: 200 }
     );
