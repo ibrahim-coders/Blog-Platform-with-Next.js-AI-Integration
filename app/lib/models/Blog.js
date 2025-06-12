@@ -6,6 +6,10 @@ const blogSchema = new mongoose.Schema({
   tags: { type: [String], default: [] },
   userName: { type: String, required: true },
   userEmail: { type: String, required: true },
+  likedUsers: {
+    type: [String],
+    default: [],
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

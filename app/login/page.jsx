@@ -6,12 +6,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useUser } from '../context/useProvider';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { setUser } = useUser();
+
   const handleLogin = async e => {
     e.preventDefault();
     try {
@@ -20,7 +19,6 @@ export default function LoginPage() {
         password,
       });
       if (res.data.success) {
-        setUser(res.data?.user);
         toast.success(res.data.message);
         window.location.href = '/';
         setEmail('');

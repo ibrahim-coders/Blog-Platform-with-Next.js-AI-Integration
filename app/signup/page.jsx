@@ -6,13 +6,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useUser } from '../context/useProvider';
 
 const SignupPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { setUser } = useUser();
   const handleLogin = async e => {
     e.preventDefault();
     console.log('Name:', name, 'Email:', email, 'Password:', password);
@@ -22,7 +20,6 @@ const SignupPage = () => {
         email,
         password,
       });
-      setUser(res.data?.user);
       toast.success(res.data.message);
       window.location.href = '/';
       setEmail('');
@@ -88,6 +85,7 @@ const SignupPage = () => {
               Signup
             </button>
           </form>
+
           <p className="mt-4 text-center text-white ">
             Already have an account?
             <Link

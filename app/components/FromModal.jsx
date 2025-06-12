@@ -1,8 +1,8 @@
-import { Brain, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import LoadingSpinner from './LoadingSpinner';
-import { useUser } from '../context/useProvider';
-import axios from 'axios';
 import { toast } from 'sonner';
+import { useGetMeQuery } from '../services/userApi';
+import { useCreatePostMutation } from '../services/postsApi';
 const FromModal = ({
   closeModal,
   title,
@@ -12,10 +12,17 @@ const FromModal = ({
   tags,
   setTags,
   loading,
-
   setLoading,
 }) => {
-  const { user } = useUser();
+  const { data: user, refetch } = useGetMeQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const userInf = user?.user;
+  const [createPost] = useCreatePostMutation();
+
+  // GenerateContent
+
   const handleGenerateContent = async () => {
     setLoading(true);
     const res = await fetch('/api/ai/openrouter', {
@@ -32,25 +39,36 @@ const FromModal = ({
     setLoading(false);
   };
 
+  // PublishBlog content database
+
   const handlePublishBlog = async () => {
-    if (!user) return (window.location.href = '/login');
+    if (!userInf) return (window.location.href = '/login');
+    if (loading) return;
+    setLoading(true);
+
     try {
-      const res = await axios.post('/api/posts', {
+      const res = await createPost({
         title,
         content,
         tags,
-        userName: user?.name,
-        userEmail: user?.email,
-      });
+        userName: userInf?.name,
+        userEmail: userInf?.email,
+      }).unwrap();
+
       closeModal();
-      toast.success(res.data.message);
+      toast.success(res.message);
+      await refetch();
     } catch (error) {
-      toast.error('Intrnal server error');
+      toast.error('Internal server error');
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <div className="relative w-full  sm:max-w-md mx-auto ">
       <button
+        type="button"
         onClick={closeModal}
         className="absolute top-0 right-0 size-4 text-red-600 cursor-pointer"
       >
@@ -66,19 +84,16 @@ const FromModal = ({
             type="button"
             onClick={handleGenerateContent}
             disabled={loading || !content}
-            className="flex gap-2 shdow rounded border border-emerald-500 px-3 py-2 text-slate-800 cursor-pointer"
+            className="flex gap-2 shdow rounded border border-emerald-500 px-3 py-2  cursor-pointer"
           >
-            {loading ? (
-              'Generating...'
-            ) : (
-              <>
-                Generate <Brain />
-              </>
-            )}
+            {loading ? 'Generating...' : <>Generate</>}
           </button>
           <button
             onClick={handlePublishBlog}
-            className="flex gap-2 shdow rounded border bg-emerald-500 px-3 py-2 text-white hover:bg-emerald-600 transition-colors duration-200 cursor-pointer"
+            disabled={loading}
+            className="flex gap-2 shadow rounded border px-3 py-2 text-white transition-colors duration-200 
+              bg-emerald-500 hover:bg-emerald-600
+            "
           >
             Publish
           </button>
@@ -94,14 +109,14 @@ const FromModal = ({
         ) : (
           <form onSubmit={e => e.preventDefault()}>
             <div className="flex flex-col space-y-2 items-start">
-              <label className="inline-block text-sm text-slate-400">
+              <label className="inline-block text-sm text-slate-50">
                 Title
               </label>
               <input
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                className="w-full p-2.5 text-sm border border-slate-800 focus:outline-none text-slate-950 transition-colors duration-200"
+                className="w-full p-2.5 text-sm border border-slate-50 focus:outline-none bg-[#314158] text-slate-50 transition-colors duration-200"
                 placeholder="title"
                 required
               />
@@ -113,7 +128,7 @@ const FromModal = ({
                 onChange={e => setContent(e.target.value)}
                 cols={50}
                 rows={4}
-                className="w-full p-2.5 text-sm border border-slate-800 focus:outline-none text-slate-950 transition-colors duration-200"
+                className="w-full p-2.5 text-sm border border-slate-50 focus:outline-none bg-[#314158] text-slate-50 transition-colors duration-200"
               ></textarea>
               <label className="inline-block text-sm text-slate-400">
                 Tags
@@ -123,7 +138,7 @@ const FromModal = ({
                 value={tags}
                 onChange={e => setTags(e.target.value)}
                 placeholder="Enter tags "
-                className="w-full p-2.5 text-sm border border-slate-800 focus:outline-none text-slate-950 transition-colors duration-200"
+                className="w-full p-2.5 text-sm border border-slate-50 focus:outline-none bg-[#314158] text-slate-50 transition-colors duration-200"
               />
             </div>
           </form>

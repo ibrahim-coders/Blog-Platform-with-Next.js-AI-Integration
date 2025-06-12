@@ -1,5 +1,5 @@
 import ConnectDB from '@/app/lib/config/db';
-import Post from '@/app/lib/models/Bolg';
+import Post from '@/app/lib/models/Blog';
 import { NextResponse } from 'next/server';
 
 export const POST = async req => {
@@ -23,7 +23,7 @@ export const POST = async req => {
       post,
     });
   } catch (error) {
-    console.error('POST /api/posts error:', error);
+    
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

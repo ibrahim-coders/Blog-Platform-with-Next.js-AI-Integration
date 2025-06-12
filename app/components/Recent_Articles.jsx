@@ -1,42 +1,52 @@
 'use client';
 
-import axios from 'axios';
-import { BookOpen, MessageCircle, ThumbsUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { BookOpen, ThumbsUp } from 'lucide-react';
+import { useGetPostsQuery, useLikePostMutation } from '../services/postsApi';
+import LoadingSpinner from './LoadingSpinner';
+import { useGetMeQuery } from '../services/userApi';
 
 const Recent_Articles = () => {
-  const [bolgs, setBolg] = useState([]);
+  const { data, isLoading } = useGetPostsQuery();
+  const blogs = data?.posts || [];
+  const { data: user } = useGetMeQuery();
+  const userId = user?.user?._id;
+  const [likePost] = useLikePostMutation();
 
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const res = await axios.get('/api/posts');
-        setBolg(res.data?.posts || []);
-      } catch (error) {
-        console.error('Failed to fetch blogs:', error);
-      }
-    };
-    fetchBlogs();
-  }, []);
+  const handleLike = async postId => {
+    if (!userId) return;
+    console.log(postId);
+    await likePost({ id: postId, userId });
+  };
 
+  if (isLoading) return <LoadingSpinner />;
+
+  const fasword = name => {
+    if (!name) return '';
+    const words = name.trim().split(' ');
+    let initials = '';
+    for (let i = 0; i < Math.min(words.length, 2); i++) {
+      initials += words[i][0];
+    }
+    return initials.toUpperCase();
+  };
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-4 py-6 gap-6 bg-white">
-      {bolgs.map(bolg => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-4 py-6 gap-6 bg-slate-900">
+      {blogs.map(blog => (
         <div
-          key={bolg._id}
-          className="shadow-md rounded-lg p-4 border border-gray-100 bg-gray-50"
+          key={blog._id}
+          className="shadow-md rounded-lg p-4 border border-gray-400 bg-slate-700"
         >
           {/* User info */}
           <div className="flex gap-3 items-center mb-3">
             <p className="bg-emerald-500 rounded-full text-white w-12 h-12 flex justify-center items-center font-bold">
-              {bolg.userName?.charAt(0) || 'A'}
+              {fasword(blog?.userName)}
             </p>
             <div className="flex flex-col">
-              <p className="text-lg font-semibold text-slate-700">
-                {bolg.userName}
+              <p className="text-lg font-semibold text-white ">
+                {blog.userName}
               </p>
-              <span className="text-sm text-slate-500">
-                {new Date(bolg.createdAt).toLocaleDateString('en-US', {
+              <span className="text-sm text-white ">
+                {new Date(blog.createdAt).toLocaleDateString('en-US', {
                   day: '2-digit',
                   month: 'short',
                 })}
@@ -45,36 +55,45 @@ const Recent_Articles = () => {
           </div>
 
           {/* Title */}
-          <h2 className="text-xl font-bold text-slate-900 mb-2">
-            {bolg.title}
+          <h2 className="text-xl font-bold text-white  mb-2">
+            {blog.title.slice(0, 30)}...
           </h2>
 
           {/* Content */}
-          <p className="text-slate-600 text-sm mb-3">{bolg.content}</p>
+          <p className="text-white  text-sm mb-3">{blog.content}</p>
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mt-2 ">
-            {bolg.tags.slice(0, 2).map((tag, index) => (
+            {blog.tags.slice(0, 2).map((tag, index) => (
               <p
                 key={index}
-                className="text-slate-800 bg-emerald-100 rounded px-2 py-1 text-xs shadow"
+                className="text-white  bg-slate-400 rounded px-2 py-1 text-xs shadow"
               >
                 {tag}
               </p>
             ))}
-            {bolg.tags.length > 2 && (
-              <p className="text-slate-600 bg-slate-200 rounded px-2 py-1 text-xs shadow">
-                +{bolg.tags.length - 2} more
+            {blog.tags.length > 2 && (
+              <p className="text-white  bg-slate-400 rounded px-2 py-1 text-xs shadow">
+                +{blog.tags.length - 2} more
               </p>
             )}
           </div>
           <div className="flex justify-between items-center  border-t mt-4 border-slate-950 ">
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-2 mt-4 items-center">
               {' '}
-              <ThumbsUp className="text-slate-800" />
-              <MessageCircle className="text-slate-800" />
+              <ThumbsUp
+                onClick={() => handleLike(blog._id)}
+                className={
+                  blog.likedUsers?.includes(userId)
+                    ? 'text-emerald-500'
+                    : 'text-white'
+                }
+              />
+              <span>
+                {blog.likedUsers?.length > 0 ? blog.likedUsers?.length : ''}
+              </span>
             </div>
-            <BookOpen className="text-slate-800 mt-4" />
+            <BookOpen className="text-white  mt-4" />
           </div>
         </div>
       ))}

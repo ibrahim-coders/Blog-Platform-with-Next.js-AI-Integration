@@ -21,7 +21,7 @@ export const POST = async req => {
           role: 'user',
           content: `Given this blog post content, extract:
 - title (max 2 lines)
-- content (max 5 lines)
+- content (max 30 lines)
 - tags (comma separated, max 4)
 
 Return as JSON. Content:\n${content}`,
@@ -30,7 +30,7 @@ Return as JSON. Content:\n${content}`,
     }),
   });
   const data = await res.json();
-  console.log(data);
+
   // Parse AI response as JSON
   let aiTitle = '',
     aiContent = '',

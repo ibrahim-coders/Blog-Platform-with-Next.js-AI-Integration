@@ -1,18 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useUser } from '../context/useProvider';
 import axios from 'axios';
+import { useGetMeQuery } from '../services/userApi';
 
 export default function Navbar() {
-  const { user } = useUser();
-  console.log(user);
+  const { data, isLoading } = useGetMeQuery();
 
-  const { setUser } = useUser();
-
+  const user = data?.user;
   const handleLogout = async () => {
     await axios.post('/api/auth/logout');
-    setUser(null);
     window.location.href = '/login';
   };
 
@@ -25,9 +22,10 @@ export default function Navbar() {
     }
     return initials.toUpperCase();
   };
+  if (isLoading) return null;
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-20 w-full  border-slate-200 bg-white/90 shadow">
+      <header className="fixed top-0 left-0 right-0 z-20 w-full  border-slate-200 bg-slate-100 shadow">
         <div className="relative mx-auto max-w-full px-6 lg:max-w-5xl xl:max-w-7xl 2xl:max-w-[96rem]">
           <nav className="flex h-[5.5rem] items-stretch justify-between font-medium ">
             {/*      <!-- Brand logo --> */}
